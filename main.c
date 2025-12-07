@@ -104,6 +104,10 @@ int main()
 
         if (isEOF || c == ' ' || c == '\r' || c == '\n') // checks for whitespace or EOF to decide if a full word has been read
         {
+            if (index > (100 - penX) / textHeight) // checks if the word will move penX past 100mm
+            {
+                letterToGCode('\n', &GCodeBuffer, fontData, textHeight, &penX, &penY); // enters a newline before converting the word
+            }
             for (int i = 0; i < index; i++) // iterates through the characters in the word
             {
                 letterToGCode(currentWordBuffer[i], &GCodeBuffer, fontData, textHeight, &penX, &penY); // adds the GCode instructions for the character to GCodeBuffer.data

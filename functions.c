@@ -107,33 +107,33 @@ void letterToGCode(char c, struct instructionBuffer* gCodeBuffer, int***fontData
 
     char gCodeInstruction[100];
 
-    if (c == ' ')
+    if (c == ' ') // if a space is detected the arm moves by the width of a character
     {
         newX = *p_penX + letterHeight;
 
-        snprintf(gCodeInstruction, sizeof(gCodeInstruction), "S0 G0 X%.3f Y%.3f", newX, *p_penY);
+        snprintf(gCodeInstruction, sizeof(gCodeInstruction), "S0 G0 X%.3f Y%.3f\n", newX, *p_penY);
 
         addToInstructionBuffer(gCodeInstruction, gCodeBuffer);
 
-        *p_penX = newX;
+        *p_penX = newX; // modify the value of penX
     }
     else if (c == '\r')
     {
        ;
     }
-    else if (c == '\n')
+    else if (c == '\n') // if a new line is detected
     {
-        newX = 0;
-        newY = *p_penY - (lineSpacing + letterHeight);
+        newX = 0; // return the pen to 0 in the x axis
+        newY = *p_penY - (lineSpacing + letterHeight); // move the pen down a line
 
-        snprintf(gCodeInstruction, sizeof(gCodeInstruction), "S0 G0 X%.3f Y%.3f", newX, newY);
+        snprintf(gCodeInstruction, sizeof(gCodeInstruction), "S0 G0 X%.3f Y%.3f\n", newX, newY);
 
         addToInstructionBuffer(gCodeInstruction, gCodeBuffer);
 
-        *p_penX = newX;
+        *p_penX = newX; // modify the values of penX and penY
         *p_penY = newY;
     }
-    else if ((int)c > 127)
+    else if ((int)c > 127) // if the character is not in regular ASCII print error message and skip
     {
         printf("Error: Could not convert character \'%c\' to GCode", c);
     }
@@ -144,21 +144,20 @@ void letterToGCode(char c, struct instructionBuffer* gCodeBuffer, int***fontData
 
         //printf("number of movements for -%c- : %d\n", c, numMovements);
 
-        for (int i = 1; i <= numMovements; i++)
+        for (int i = 1; i <= numMovements; i++) // iterate through every instruction
         {
-            //printf("move --> %d %d %d\n", fontData[cIndex][i][0], fontData[cIndex][i][1], fontData[cIndex][i][2]);
-            newX = *p_penX + fontData[cIndex][i][0] * (letterHeight / fontDataLetterSize);
+            newX = *p_penX + fontData[cIndex][i][0] * (letterHeight / fontDataLetterSize); // set target x and y values
             newY = *p_penY + fontData[cIndex][i][1] * (letterHeight / fontDataLetterSize);
-            isPenDown = fontData[cIndex][i][2];
+            isPenDown = fontData[cIndex][i][2]; // set pen up or down
 
-            sValue = isPenDown * 1000;
+            sValue = isPenDown * 1000; // set "feed rate" value for GCode instrucion
 
-            snprintf(gCodeInstruction, sizeof(gCodeInstruction), "S%d G%d X%.3f Y%.3f", sValue, isPenDown, newX, newY);
+            snprintf(gCodeInstruction, sizeof(gCodeInstruction), "S%d G%d X%.3f Y%.3f\n", sValue, isPenDown, newX, newY); // generate GCode instruction
 
-            addToInstructionBuffer(gCodeInstruction, gCodeBuffer);
+            addToInstructionBuffer(gCodeInstruction, gCodeBuffer); // add instruction to GCodeBuffer
         }
 
-        *p_penX = newX;
+        *p_penX = newX; // modify the values of penX and penY
         *p_penY = newY;
     }
 }
